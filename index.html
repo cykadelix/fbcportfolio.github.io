@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Architecture Portfolio</title>
+  <title>Portfolio Viewer</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,16 +25,73 @@
   </style>
 </head>
 <body>
-  <h1>Architecture Portfolio Viewer</h1>
-  
-  <!-- Upload PDF -->
-  <input type="file" id="file-input" accept="application/pdf">
-  
+  <h1>Portfolio Viewer</h1>
+
   <!-- Canvas for rendering -->
   <canvas id="pdf-render"></canvas>
-  
+
   <!-- Navigation Controls -->
   <div class="controls">
     <button id="prev-page">Previous Page</button>
     <span>Page: <span id="page-num">1</span> / <span id="page-count">0</span></span>
-    <bu
+    <button id="next-page">Next Page</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+  <script>
+    const canvas = document.getElementById('pdf-render');
+    const ctx = canvas.getContext('2d');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageNumSpan = document.getElementById('page-num');
+    const pageCountSpan = document.getElementById('page-count');
+
+    let pdfDoc = null;
+    let pageNum = 1;
+
+    // Load the saved PDF
+    const savedPDF = localStorage.getItem('portfolioPDF');
+    if (savedPDF) {
+      const pdfData = atob(savedPDF); // Decode base64
+      const typedArray = new Uint8Array(pdfData.split('').map(char => char.charCodeAt(0)));
+      pdfjsLib.getDocument(typedArray).promise.then(pdf => {
+        pdfDoc = pdf;
+        pageCountSpan.textContent = pdf.numPages;
+        renderPage(pageNum);
+      });
+    } else {
+      alert("No portfolio available. Please upload a PDF via the admin view.");
+    }
+
+    // Render page
+    const renderPage = (num) => {
+      pdfDoc.getPage(num).then(page => {
+        const viewport = page.getViewport({ scale: 1.5 });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        const renderContext = {
+          canvasContext: ctx,
+          viewport: viewport
+        };
+        page.render(renderContext);
+
+        pageNumSpan.textContent = num;
+      });
+    };
+
+    // Navigation
+    prevPageBtn.addEventListener('click', () => {
+      if (pageNum <= 1) return;
+      pageNum--;
+      renderPage(pageNum);
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+      if (pageNum >= pdfDoc.numPages) return;
+      pageNum++;
+      renderPage(pageNum);
+    });
+  </script>
+</body>
+</html>

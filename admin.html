@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    input {
+      margin: 20px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+  
+  <!-- Upload PDF -->
+  <input type="file" id="file-input" accept="application/pdf">
+  <button id="save-pdf">Save Portfolio</button>
+
+  <script>
+    const fileInput = document.getElementById('file-input');
+    const saveButton = document.getElementById('save-pdf');
+
+    saveButton.addEventListener('click', () => {
+      const file = fileInput.files[0];
+      if (file && file.type === 'application/pdf') {
+        const reader = new FileReader();
+        reader.onload = function () {
+          const base64 = btoa(reader.result); // Encode binary to base64
+          localStorage.setItem('portfolioPDF', base64);
+          alert("Portfolio PDF saved successfully!");
+        };
+        reader.readAsBinaryString(file);
+      } else {
+        alert("Please upload a valid PDF file.");
+      }
+    });
+  </script>
+</body>
+</html>
